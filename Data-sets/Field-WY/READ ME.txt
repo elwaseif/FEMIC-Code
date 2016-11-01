@@ -1,0 +1,21 @@
+The WY data folder contains this READ ME file and two additional files for the Wyoming data set in the paper:
+
+1) Input_WY_data.dat: A text (ascii) file containing the input data, with columns of:
+- x location in meters
+- y location in meters
+- z location in meters
+- sounding identification (ID) #, with different data at same location sharing a sounding ID
+- frequency, in hertz
+- Standard error, in data units
+- coil configration, 1 for vertical dipole, 2 for horizontal dipole, or 3 for both
+- list of apparent conductivity values for each frequency, in milliSiemens/meter
+
+
+2) Initial model.dat: A text (ascii) file containing initial FEMIC models for this example, with columns of:
+- x location in meters
+- y location in meters
+- z location in meters
+- sounding identification
+- layer number
+- initial conductivity value, in milliSiemens/meter for each layer 
+- additional rows for alternative starting models
