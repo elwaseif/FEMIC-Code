@@ -52,7 +52,8 @@
 function [p_final, muh_final, rms_error2, G,sense,cell_sensy]=FEMIC_tost2(MM,S,el,pobs,sigma,muv,err_tol,max_iter,q,sx,sz,wta,pmin,pmax,coords,sens,cell_sens)
 
 %% Initialize array size and constant parameters
-MM.con(MM.con>0)=log10(MM.con(MM.con>0));dlmwrite('init.dat',MM.con)
+MM.con(MM.con>0)=log10(MM.con(MM.con>0));%dlmwrite('init.dat',MM.con);
+pree=MM.con;
 porder = 2;             % norm order (p-value) for error calc (p=2 -> L2 norm)
 szp=size(pobs);         % number of frequencies (x2) by number of stations
 P=szp(2);               % number of data (freq x 2)
@@ -94,7 +95,8 @@ mref=xc;%muv=muv/100000;
 %% convergence criteria are met
 itc = 0; 
 misfit = []; gc = 1; normg0 = 1;
-while(norm(gc)/normg0 > err_tol & itc < max_iter & norm(gc)>1e-20)
+bet=linspace(100,1,max_iter);
+for ioo=1:max_iter%while(norm(gc)/normg0 > err_tol & itc < max_iter & norm(gc)>1e-20)
    % iteration count
    itc = itc+1;
      for ii=1:P,          % loop over all measurement positions (B1)
@@ -127,17 +129,25 @@ while(norm(gc)/normg0 > err_tol & itc < max_iter & norm(gc)>1e-20)
           %%Temporarily assign a value, to be corrected later
           para.BETA = 0;
    end;
-  dx=ones(P,1);
-  dz=MM.thk;dy=dx;
-  wta=wta(:);wta(wta<1)=0;
+  dx=ones(P,1);wq=1:P;for i=1:length(wq); xx(:,i)=wq(i)*ones(length(MM.thk),1);zz(:,i)=-cumsum(MM.thk);end;zz2=[zeros(1,P);zz];
+xx2=[zeros(length(MM.thk),1),xx];xx=((xx2(:,1:end-1)+xx2(:,2:end))/2);
+zz=((zz2(1:end-1,:)+zz2(2:end,:))/2);%dlmwrite('pmin.dat',pmin);%dlmwrite('pmax.dat',pmax);
+ nx=length(dx);nz=length(MM.thk); mesh.num_param=nx*nz;mesh.param_x=xx(:);
+  mesh.param_y=zz(:);
+  input.time_lapse_flag=0;
+    dz=MM.thk;dy=dx;%dlmwrite('wta.dat',wta);
+  wta=wta(:);%wta(wta<1)=0;
+  mesh=smooth_mtx_surface4444(input,mesh,wta,nx,nz,sx,sz);
   nx=length(dx);nz=length(dz);V = spdiags((wta(:)), 0, nx*nz, nx*nz); 
   [Gx, Gz]=newgradient(dx,dz);als=10;%V=0;
    Gs = sx*Gx+sz*Gz;
    Wt = spdiags(wta(:),0,nx*nz,nx*nz);wty=ones(length(wta(:)),1);Wty = spdiags(wty(:),0,nx*nz,nx*nz);
-   MW = Wt' * ( Gs' * Gs + als * V ) * Wt;pin=pin(:);%reshape(pin,length(pin),1);
+   MW = Wt' * ( Gs' * Gs + als * V ) * Wt;
+   MW=mesh.ctc;
+   pin=pin(:);%reshape(pin,length(pin),1);
    mref=mref(:);%reshape(mref,length(mref),1);
    %dlmwrite('pin.dat',pin);dlmwrite('mref.dat',mref);dlmwrite('MW.dat',MW);
-    X =0;% diag( (1./(xc(:)-log10(1/pmin))) + (1./(log10(1/pmax)-xc(:))),0 );
+    X = diag( (1./(xc(:)-log10(1/pmin))) + (1./(log10(1/pmax)-xc(:))),0 );
    fm = (xc(:)-mref)'*MW*(xc(:)-mref) + muv*(xc(:)-mref)'*(xc(:)-mref)+(X'*X);
   fc =fd+16*fm;
    grad_fm = muv*MW*(xc(:)-mref);%dlmwrite('gm.dat',grad_fm);
@@ -213,19 +223,44 @@ pin=pin(:);
       
      
       if(iarm > 5)
-           disp(' Line search FAIL EXIT(0)');     
-           return;             
+           %disp(' Line search FAIL EXIT(0)');     
+           break;             
 		  end
       fgoal = fc - para.alp*mu_LS*(s'*gc);
    end  % end line search
+   covdem=W'*W;
+[g3, ~]=size(mesh.ctc);
+%covdem=diag(ones(length(pobs(:)),1));
+covmem=mesh.ctc'*mesh.ctc;
+alphem=1;
+N1r=(1/bet(ioo)^2)*J'*covdem*J+(alphem^2)*mesh.ctc'*mesh.ctc+covmem;%dlmwrite('params.dat',params);%dlmwrite('J.dat',J);%dlmwrite('pobs.dat',pobs);%dlmwrite('G.dat',G);
+%dlmwrite('covmem.dat',covmem);
+n2r=(1/bet(ioo)^2)*J'*covdem*(pobs(:)-G+J*xc(:))+covmem*pree(:);
+xc=N1r\n2r;%-(AN1\(AJm'*AL));
+
+%xc=1./(10.^xc);
+%pmax1=pmin;pmin1=pmax;
+%xc(xc<pmin)=pmin;
+%xc(xc>pmax)=pmax;
+%xc=log10(1./xc);
+[gr hr]=size(xt);xc=reshape(xc,gr,hr);
+tsum=0;
+% Find RMS error
+pos=pobs(:);
+for iqe=1:length(pos)
+    tsum=tsum+(((pos(iqe))-(G(iqe))).*((pos(iqe))-(G(iqe))))./((pos(iqe))*(pos(iqe)));
+end
+rms_sum1=sqrt(tsum/length(pos))*100;
+disp(sprintf('RMS Error=>%f %',rms_sum1)); 
+
     
-   xc = xt; 
+   xt = xc; 
    misfitnew = misfit;
    misfitold = misfitnew;
    rms_error2(:,itc)=rms_error;
    %if sens 
    JTJ=J'*W*J;
-   sense=xt(:)\(JTJ);dlmwrite('sense.dat',sense);
+   sense=xt(:)\(JTJ);%dlmwrite('sense.dat',sense);
    %else
     %   sense=[];
    %end
@@ -236,7 +271,13 @@ pin=pin(:);
    end
   
 end  % end loop (A1) over iterations 
-p_final=xt;
+p_final=xc;
 muh_final=muv;
+%pmax1=log10(1/pmax);
+%pmin1=log10(1/pmin);
+%p_final(p_final<pmax1)=pmax1;
+%p_final(p_final>pmin1)=pmin1;
+    
+
 %save('J.mat','J');save('C.mat','Wt');save('D.mat','W');
   

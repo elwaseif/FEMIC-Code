@@ -4,7 +4,6 @@ function [Gx, Gz]=newgradient(x,z)
 %tmp_x # of x parameters -1 (center values)
 %tmp_z # of z parameters -1 (center values)
 
-
 mesh.num_param=length(x)*length(z);
 for i=1:length(z)
 mesh.param_x(:,i)=x;

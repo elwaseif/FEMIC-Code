@@ -1,35 +1,35 @@
-function varargout = start(varargin)
-% START MATLAB code for start.fig
-%      START, by itself, creates a new START or raises the existing
+function varargout = FEMIC_inverse5(varargin)
+% FEMIC_INVERSE5 MATLAB code for FEMIC_inverse5.fig
+%      FEMIC_INVERSE5, by itself, creates a new FEMIC_INVERSE5 or raises the existing
 %      singleton
 %
-%      H = START returns the handle to a new START or the handle to
+%      H = FEMIC_INVERSE5 returns the handle to a new FEMIC_INVERSE5 or the handle to
 %      the existing singleton*.
 %
-%      START('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in START.M with the given input arguments.
+%      FEMIC_INVERSE5('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in FEMIC_INVERSE5.M with the given input arguments.
 %
-%      START('Property','Value',...) creates a new START or raises the
+%      FEMIC_INVERSE5('Property','Value',...) creates a new FEMIC_INVERSE5 or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before start_OpeningFcn gets called.  An
+%      applied to the GUI before FEMIC_inverse5_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to start_OpeningFcn via varargin.
+%      stop.  All inputs are passed to FEMIC_inverse5_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help start
+% Edit the above text to modify the response to help FEMIC_inverse5
 
-% Last Modified by GUIDE v2.5 23-Jan-2015 13:53:54
+% Last Modified by GUIDE v2.5 12-Jul-2013 11:32:13
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @start_OpeningFcn, ...
-                   'gui_OutputFcn',  @start_OutputFcn, ...
+                   'gui_OpeningFcn', @FEMIC_inverse5_OpeningFcn, ...
+                   'gui_OutputFcn',  @FEMIC_inverse5_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -56,26 +56,26 @@ function text_dt_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 
-% --- Executes just before start is made visible.
-function start_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before FEMIC_inverse5 is made visible.
+function FEMIC_inverse5_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to start (see VARARGIN)
+% varargin   command line arguments to FEMIC_inverse5 (see VARARGIN)
 
-% Choose default command line output for start
+% Choose default command line output for FEMIC_inverse5
 handles.output = hObject;
 
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes start wait for user response (see UIRESUME)
+% UIWAIT makes FEMIC_inverse5 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = start_OutputFcn(hObject, eventdata, handles) 
+function varargout = FEMIC_inverse5_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -185,6 +185,7 @@ for ii=1:size(sound_id, 1)
     add_coords=[s_id, x, y, z];
     coords=[coords; add_coords];
 end
+%dlmwrite('meass.dat',meas);
 offset_data=get(handles.uitable_offset, 'Data'); 
 offset_data=sortrows(offset_data, 1);
 
@@ -227,8 +228,8 @@ switch dt_str
 end
 data=get(handles.uitable_datainput, 'Data');
 dtt=data(:,7);
-pmin=str2num(get(handles.edit_minparam, 'String'));pmin=1/pmin; %pmin
-pmax=str2num(get(handles.edit_maxparam, 'String'));pmax=1/pmax; %pmax
+pmin=str2num(get(handles.edit_minparam, 'String')); %pmin
+pmax=str2num(get(handles.edit_maxparam, 'String')); %pmax
 bar=str2num(get(handles.edit_initbarrier, 'String')); %bar
 
 %see which inversion type is selected
@@ -238,7 +239,6 @@ invType=get(handles.popupmenu_regcriteria, 'Value');
 %plotInter=get(handles.checkbox_interimPlot, 'Value');
 plotL=get(handles.checkbox_plotlcurve, 'Value');
 plotSens=get(handles.checkbox_plotsensit, 'Value');
-plotsensy=get(handles.checkbox_plotsensy, 'Value');
 %plotNprof=str2num(get(handles.edit_profilenum, 'String'));
 
 plotParms=[plotSens plotL]; % [plotInter plotL wprof]
@@ -247,10 +247,6 @@ plotParms=[plotSens plotL]; % [plotInter plotL wprof]
 %oneD, twoD and threeD defined above for validation check
 
 statusUpdate = @updateStatusBar;
-for i=1:length(model_cond)
-a121=log10(model_cond{i});
-model_cond{i}=a121;
-end
 
 if oneD==1 
     statusUpdate('Starting 1D Inversion....');
@@ -263,15 +259,14 @@ if oneD==1
     results.rms_error=rms_error;
     results.G=G;
 elseif twoD==1    
-    
     statusUpdate('Starting 2D Inversion....');
     vall2=str2num(get(handles.parallel,'String'));
     plotdoi=get(handles.checkbox_DOI, 'Value');
-    perc=str2num(get(handles.percent,'String'));if isempty(perc);perc=60;end
+    perc=str2num(get(handles.percent,'String'));
     [p_final, mu_final, rms_error, G, xi, ei]=FEMIC_inverse2D(model_cond, layer_thick,...
         meas, STD_error, coords, freq, offset, horizreg, vertreg, ...
         ecatol, errtol, maxiter, dtt, pmin, pmax, bar, invType, priori, sx, sz, ...
-        statusUpdate, plotSens,vall2,plotdoi,perc,el,plotsensy); 
+        statusUpdate, plotSens,vall2,plotdoi,perc,el); 
     results.p_final=p_final;
     results.mu_final=mu_final;
     results.rms_error=rms_error;
@@ -282,17 +277,17 @@ elseif twoD==1
 elseif threeD==1 
     statusUpdate('Starting 3D Inversion....');
     vall=str2num(get(handles.parallel,'String'));
-    b=parcluster();
+    b=findResource();
     b=b.ClusterSize;
     plotdoi=get(handles.checkbox_DOI, 'Value');
-    perc=str2num(get(handles.percent,'String'));if isempty(perc);perc=10;end
+    perc=str2num(get(handles.percent,'String'));
     if vall>b
         prompt('error: number of processor exceeded');end  
     warning('off');
     [p_final, mu_final, rms_error, G]=FEMIC_inverse3D(model_cond, layer_thick, ...
         meas,STD_error, freq, offset,coords, horizreg,vertreg,...
         ecatol, errtol, maxiter, dt, pmin, pmax, bar, invType, priori, sx, sy, sz, ...
-        statusUpdate, plotSens,vall,plotdoi, perc,el,plotsensy);
+        statusUpdate, plotSens,vall,plotdoi, perc,el);
     
     results.p_final=p_final;
     results.mu_final=mu_final;
@@ -303,6 +298,9 @@ end
 save('result.mat', '-struct', 'results');
 
 delete('results.xls');
+%dlmwrite('model.dat', p_final);
+%dlmwrite('rms_error.dat', rms_error);
+%dlmwrite('estimted_data.dat', G);
 
 %save modeel/inversion parameters
 fid=fopen('modelInv_parms.dat', 'w');
@@ -404,7 +402,6 @@ if fIndex~=0
             set(handles.uipanel11, 'Visible', 'off');
         end
         set(handles.checkbox_plotsensit, 'Visible', 'off');
-        set(handles.checkbox_plotsensy, 'Visible', 'off');
         set(handles.text_smooth, 'String', 'Smoothness (z)');    
         set(handles.edit_sx, 'Visible', 'off');
         set(handles.edit_sy, 'Visible', 'off');
@@ -413,7 +410,6 @@ if fIndex~=0
         set(handles.uipanel11, 'Visible', 'on');
         set(handles.checkbox_plotlcurve, 'Visible', 'off');
         set(handles.checkbox_plotsensit, 'Visible', 'on');
-        set(handles.checkbox_plotsensy, 'Visible', 'on');
         set(handles.text_smooth, 'String', 'Smoothness (x, z)');
         set(handles.edit_sx, 'Visible', 'on'); 
         set(handles.edit_sy, 'Visible', 'off'); 
@@ -422,7 +418,6 @@ if fIndex~=0
         set(handles.uipanel11, 'Visible', 'on');
         set(handles.checkbox_plotlcurve, 'Visible', 'off');
         set(handles.checkbox_plotsensit, 'Visible', 'on');
-        set(handles.checkbox_plotsensy, 'Visible', 'on');
         set(handles.text_smooth, 'String', 'Smoothness (x, y, z)');
         set(handles.edit_sx, 'Visible', 'on'); 
         set(handles.edit_sy, 'Visible', 'on'); 
@@ -450,7 +445,7 @@ t_data=uitable(h, 'Tag', 'uitable_datainput', 'Position', [30 80 500 300],...
     'FontSize', 10,...
     'ColumnEditable', isEditable, ...
     'ColumnWidth', 'auto',...
-    'ColumnName', {'x', 'y', 'z', 'Sounding id', 'Freq', 'STD Error', 'VCP[1],HCP[2]', 'Quadrature'});  
+    'ColumnName', {'x', 'y', 'z', 'Sounding id', 'Freq', 'STD Error', 'VMD[1],HMD[2]', 'Quadrature'});  
 
 cancel_but=uicontrol(h, 'Style', 'pushbutton', 'String', 'Cancel',...
     'FontSize', 10, 'Position', [460 30 70 30],...
@@ -471,21 +466,15 @@ if fIndex~=0
     %fid=fopen(strcat(pname), 'r');
     %f = fread(fid,Inf);
     data = GEM2FEM(strcat(pname,fname)); %added by Neil
-   
-    if isreal(data(:,8))
-        fuu = msgbox('Geonics Input Data is detected');tic;uiwait(fuu,1);toc;if toc>=1;close(fuu);end;
-        wee=unique(data(:,5));wee2=reshape(data(:,8),length(wee),length(data(:,8))/length(wee));[mwe twe]=size(wee2);wee3=reshape(data(:,9),length(wee),length(data(:,8))/length(wee));
-        for iw=1:twe
-            for jw=1:mwe
-                qwe(jw,iw)=1e6.*((sqrt(-1)*(2*pi*wee(jw))*1.25663706*10-6*(1e-3*wee2(jw,iw))*(wee3(jw,iw)^2))/4000000000);
-            end
-        end
-        data(:,8)=qwe(:);
-    else
-        fuu = msgbox('GEM-2 Input Data is detected');tic;uiwait(fuu,1);toc;if toc>=1;close(fuu);end;
-    end
+    %dlmwrite('data.dat',data)
+    %s = char(f');  % read in the file into a single character string
 
-         
+    %[data, status] = str2num(s);
+    %if status==0
+    %    msgbox('Your data input file selection contains strings.  Select a different file.', 'Incorrect file format');
+    %    return;
+    %end
+      
     set(handles.uitable_datainput, 'Data', data);
     set(handles.text_dataFile, 'String', fname);
      
@@ -510,11 +499,11 @@ if fIndex~=0
     vdm=find(flag==1);
     hdm=find(flag==2);
     if ~isempty(vdm) && ~isempty(hdm)
-        set(handles.text_dt, 'String', 'Both VCP and HCP');
+        set(handles.text_dt, 'String', 'Both VMD and HMD');
     elseif ~isempty(hdm)
-        set(handles.text_dt, 'String', 'HCP');
+        set(handles.text_dt, 'String', 'HMD');
     elseif ~isempty(vdm)
-        set(handles.text_dt, 'String', 'VCP');
+        set(handles.text_dt, 'String', 'VMD');
     end
     
     %see if initial model has same number of soundings as data input
@@ -982,7 +971,6 @@ set(handles.edit_sz, 'Visible', 'on');
 
 set(handles.checkbox_plotlcurve, 'Visible', 'off')
 set(handles.checkbox_plotsensit, 'Visible', 'off');
-set(handles.checkbox_plotsensy, 'Visible', 'off');
 set(handles.uipanel11, 'Visible', 'off');
 
 
@@ -1008,10 +996,10 @@ sound_id=unique(data(:, 4));
 num_soundings=length(sound_id);
 
 str= strcat('Data input has:  ', num2str(num_soundings), ' soundings.  Enter how many layers in each sounding:');
-prompt = {str, 'Enter layer thicknesses separated by a space:', 'Enter layer conductivities (S/m) separated by a space'};
+prompt = {str, 'Enter layer thicknesses separated by a space:', 'Enter layer conductivities log10(S/m) separated by a space'};
 dlg_title = 'Create Layered Model';
 num_lines = 1;
-def = {'5', '2  3  4  4  2', '0.01  0.01  0.01  0.01  0.01'};
+def = {'5', '2  3  4  4  2', '10  5  7  5  10'};
 
 TextInfo.FontSize = 12;
 
@@ -1032,6 +1020,7 @@ if ~isempty(layer_model)
         msgbox('All entries must only contain numeric values', 'Incorrect data format');
         return;
     end
+    
     %model cond: layer_model{3}
     [model_cond, status]=str2num(layer_model{3});
     if ~status
@@ -1054,10 +1043,10 @@ if ~isempty(layer_model)
 
     constraint_wgt=zeros(num_layers,1);
     layer_num=[1:1:num_layers];
-    data=[sound_id, layer_num', thickness', ([model_cond])', constraint_wgt];
+    data=[sound_id, layer_num', thickness', model_cond', constraint_wgt];
     
     for ii=1:num_soundings-1
-        add_data=[sound_id+ii, layer_num', thickness', ([model_cond])', constraint_wgt];
+        add_data=[sound_id+ii, layer_num', thickness', model_cond', constraint_wgt];
         data=[data; add_data];
     end
     
@@ -1432,14 +1421,12 @@ if val==4
 
     end
     set(handles.checkbox_plotsensit, 'Visible', 'off');
-    set(handles.checkbox_plotsensy, 'Visible', 'off');
     set(handles.checkbox_DOI, 'Visible', 'off');
     set(handles.percent,'Visible','off')
     set(handles.uipanel11, 'Visible', 'on');
 else
     set(handles.checkbox_plotlcurve, 'Visible', 'off')
     set(handles.checkbox_plotsensit, 'Visible', 'on');
-    set(handles.checkbox_plotsensy, 'Visible', 'on');
     set(handles.checkbox_DOI, 'Visible', 'on');
     set(handles.uipanel11, 'Visible', 'on');
     set(handles.percent,'Visible','on')
@@ -1525,7 +1512,7 @@ function uitable_initmodel_show_CreateFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 initmodelthick=[2;2;2;2;2];
-initmodelcond=0.01*ones(5,1);
+initmodelcond=log10(1/100)*ones(5,1);
 
 data=[initmodelthick initmodelcond];
 set(hObject, 'Data', data);
@@ -1944,7 +1931,6 @@ if strcmp(str, '1D')
         set(handles.checkbox_plotlcurve, 'Visible', 'off');
     end 
     set(handles.checkbox_plotsensit, 'Visible', 'off');
-    set(handles.checkbox_plotsensy, 'Visible', 'off');
 elseif strcmp(str,'2D') 
     set(handles.percent,'Visible','on')
     set(handles.text_smooth, 'String', 'Smoothness (x, z)');
@@ -1952,7 +1938,6 @@ elseif strcmp(str,'2D')
     set(handles.edit_sy, 'Visible', 'off'); 
     set(handles.checkbox_plotlcurve, 'Visible', 'off');
     set(handles.checkbox_plotsensit, 'Visible', 'on');
-    set(handles.checkbox_plotsensy, 'Visible', 'on');
     set(handles.uipanel11, 'Visible', 'on');
 elseif strcmp(str,'3D')
     set(handles.percent,'Visible','on')
@@ -1962,7 +1947,6 @@ elseif strcmp(str,'3D')
     set(handles.uipanel11, 'Visible', 'on');
     set(handles.checkbox_plotlcurve, 'Visible', 'off');
     set(handles.checkbox_plotsensit, 'Visible', 'on');
-    set(handles.checkbox_plotsensy, 'Visible', 'on');
 end
         
 
@@ -2172,6 +2156,8 @@ fff=data1(:,7);q=fff;vall2=str2num(get(handles.parallel,'String'));
 [rawGem calGem filtGem]=FEMIC_cal(data2,data1,f,r,q(1),vall2);
 filtGem=filtGem;filtGem=filtGem(:);
 %replace original data with filtered data
+%dlmwrite('Filtered_data.dat',filtGem);
+
 data=get(handles.uitable_datainput, 'Data');data(:,8)=filtGem;
 set(handles.uitable_datainput, 'Data', data);
 
@@ -2184,7 +2170,7 @@ function percent_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'String') returns contents of percent as text
 %        str2double(get(hObject,'String')) returns contents of percent as a double
-perc=str2num(get(handles.percent,'String'));if isempty(perc);perc=10;end
+perc=str2num(get(handles.percent,'String'));
 
 
 % --- Executes during object creation, after setting all properties.
@@ -2258,12 +2244,3 @@ function edit_elevation_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --- Executes on button press in checkbox_plotsensy.
-function checkbox_plotsensy_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox_plotsensy (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of checkbox_plotsensy

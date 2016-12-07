@@ -76,9 +76,10 @@ LCURVEf = 0;                % Initialize LCURVE method to DEFAULT (=not used)
 %                             % line search and a step-length control which ensures that all elements of the iteration
 %                             % vector are positive.)
 %% Initialize array size and constant parameters
-
+if isempty(gcp('nocreate'));%isOpen = matlabpool('size') > 0;%plotdoi=0;
+%if isOpen==0
 parpool('local',vall)
-
+end
 boo=init_lyrthick;
 sigma=sigma(:);
 
